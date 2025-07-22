@@ -57,7 +57,7 @@
   "deployment": {
     "platforms": [
       "Netlify",
-      "Vercel", 
+      "Vercel",
       "GitHub Pages",
       "Firebase Hosting"
     ],
@@ -74,8 +74,16 @@
     "seo": "Search engine optimized",
     "accessibility": "WCAG 2.1 compliant",
     "performance": "Optimized for speed",
-    "categories": ["Politics", "Business", "Society", "Technology"],
-    "userRoles": ["Administrator", "Editor"]
+    "categories": [
+      "Politics",
+      "Business",
+      "Society",
+      "Technology"
+    ],
+    "userRoles": [
+      "Administrator",
+      "Editor"
+    ]
   },
   "technical": {
     "framework": "Vanilla JavaScript",
@@ -84,5 +92,8 @@
     "images": "External CDN (Unsplash)",
     "fonts": "Google Fonts (Inter, Playfair Display)",
     "icons": "Font Awesome 6.4.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.0"
   }
 }

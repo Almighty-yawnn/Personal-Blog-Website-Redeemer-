@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article - Redeemer Buatsi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">Redeemer Buatsi</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="articles.html" class="nav-link">Articles</a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html#about" class="nav-link">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html#contact" class="nav-link">Contact</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading article...</p>
+    </div>
+
+    <!-- Article Content -->
+    <main class="article-detail">
+        <div class="container">
+            <!-- Article Header -->
+            <header class="article-header">
+                <nav class="breadcrumb">
+                    <a href="index.html">Home</a>
+                    <span>/</span>
+                    <a href="articles.html">Articles</a>
+                    <span>/</span>
+                    <span id="articleBreadcrumb">Article</span>
+                </nav>
+                
+                <div class="article-meta-top">
+                    <span id="articleCategory" class="article-category"></span>
+                    <span id="articleDate" class="article-date"></span>
+                </div>
+                
+                <h1 id="articleTitle" class="article-title"></h1>
+                <p id="articleExcerpt" class="article-excerpt"></p>
+                
+                <div class="article-author-info">
+                    <div class="author-details">
+                        <span class="author-name">By <span id="articleAuthor"></span></span>
+                        <div class="article-stats">
+                            <span id="articleViews" class="stat-item">
+                                <i class="fas fa-eye"></i>
+                                <span>0 views</span>
+                            </span>
+                            <span id="articleReadTime" class="stat-item">
+                                <i class="fas fa-clock"></i>
+                                <span>5 min read</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="article-actions">
+                        <button class="share-btn" onclick="shareArticle()">
+                            <i class="fas fa-share-alt"></i>
+                            Share
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Featured Image -->
+            <div class="article-image-container">
+                <img id="articleImage" class="article-featured-image" alt="" loading="lazy">
+            </div>
+
+            <!-- Article Content -->
+            <article class="article-content-wrapper">
+                <div id="articleContent" class="article-content"></div>
+                
+                <!-- Article Tags -->
+                <div id="articleTags" class="article-tags"></div>
+                
+                <!-- Article Navigation -->
+                <div class="article-navigation">
+                    <div id="prevArticle" class="nav-article prev-article" style="display: none;">
+                        <span class="nav-label">Previous Article</span>
+                        <a href="#" class="nav-title"></a>
+                    </div>
+                    <div id="nextArticle" class="nav-article next-article" style="display: none;">
+                        <span class="nav-label">Next Article</span>
+                        <a href="#" class="nav-title"></a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Related Articles -->
+            <section id="relatedArticles" class="related-articles" style="display: none;">
+                <h3>Related Articles</h3>
+                <div id="relatedArticlesGrid" class="related-articles-grid"></div>
+            </section>
+
+            <!-- Back to Articles -->
+            <div class="back-to-articles">
+                <a href="articles.html" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to All Articles
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Error State -->
+    <div id="errorState" class="error-state" style="display: none;">
+        <div class="container">
+            <div class="error-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h2>Article Not Found</h2>
+                <p>Sorry, the article you're looking for doesn't exist or has been removed.</p>
+                <div class="error-actions">
+                    <a href="articles.html" class="btn btn-primary">Browse All Articles</a>
+                    <a href="index.html" class="btn btn-outline">Go to Homepage</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Redeemer Buatsi</h3>
+                    <p>Journalist and media professional covering politics, business, and society in Ghana and beyond.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="articles.html" data-category="politics">Politics</a></li>
+                        <li><a href="articles.html" data-category="business">Business</a></li>
+                        <li><a href="articles.html" data-category="technology">Technology</a></li>
+                        <li><a href="articles.html" data-category="society">Society</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="articles.html">All Articles</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Stay updated with the latest articles and insights.</p>
+                    <form class="newsletter-form" id="footerNewsletterForm">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Redeemer Buatsi. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="article.js"></script>
+</body>
+</html>

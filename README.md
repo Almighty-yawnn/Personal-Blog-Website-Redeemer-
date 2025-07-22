@@ -116,6 +116,69 @@ personal-website/
 - Use descriptive filenames
 - Images are stored locally (consider cloud storage for production)
 
+## Supabase Backend Setup
+
+This project uses Supabase as the backend for articles, authentication, and data management. Follow these steps to set up your Supabase project:
+
+### 1. Database Schema Setup
+
+1. Go to your Supabase project dashboard: https://supabase.com/dashboard/project/bxusfjvtccvkpwlxupiq
+2. Navigate to the **SQL Editor** in the left sidebar
+3. Copy and paste the contents of `supabase-schema.sql` into the SQL Editor
+4. Click **Run** to execute the schema creation
+
+This will create all necessary tables:
+
+- `categories` - Article categories
+- `articles` - Blog articles with content
+- `pages` - Static pages
+- `contacts` - Contact form submissions
+- `subscribers` - Newsletter subscribers
+- `comments` - Article comments
+- `article_views` - View tracking
+- `user_roles` - User role management
+
+### 2. Create Admin User
+
+1. Go to **Authentication** > **Users** in your Supabase dashboard
+2. Click **Add user** and create a user with your email and password
+3. After creating the user, go to **SQL Editor** and run this query to make them an admin:
+
+```sql
+INSERT INTO user_roles (user_id, role, created_at)
+VALUES (
+  (SELECT id FROM auth.users WHERE email = 'your-email@example.com'),
+  'admin',
+  NOW()
+);
+```
+
+Replace `'your-email@example.com'` with the email you used to create the user.
+
+### 3. Test the Integration
+
+1. Open `admin.html` in your browser
+2. Try logging in with the admin credentials you created
+3. Create a test article to verify everything is working
+4. Check the main site (`index.html`) to see if articles load from Supabase
+
+### 4. Row Level Security (RLS)
+
+The schema automatically sets up Row Level Security policies:
+
+- **Public users** can only read published articles
+- **Admin users** can create, read, update, and delete all content
+- **Contact forms and subscriptions** are publicly writable but only admin readable
+
+### Troubleshooting
+
+If you encounter issues:
+
+1. **Check browser console** for error messages
+2. **Verify credentials** in `supabase-config.js` match your project
+3. **Ensure schema is applied** by checking tables exist in Supabase dashboard
+4. **Check user roles** by running: `SELECT * FROM user_roles;` in SQL Editor
+
 ## Customization
 
 ### Colors and Branding

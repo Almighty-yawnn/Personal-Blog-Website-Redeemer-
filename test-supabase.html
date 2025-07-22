@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { border-color: #4CAF50; background: #f0f8f0; }
+        .error { border-color: #f44336; background: #fff0f0; }
+        .pending { border-color: #ff9800; background: #fff8f0; }
+        button {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #34495e; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Supabase Connection Test</h1>
+        <p>This page will help you verify that your Supabase integration is working correctly.</p>
+        
+        <div class="test-section pending" id="connectionTest">
+            <h3>1. Connection Test</h3>
+            <p>Testing connection to Supabase...</p>
+            <button onclick="testConnection()">Test Connection</button>
+            <div class="log" id="connectionLog"></div>
+        </div>
+        
+        <div class="test-section pending" id="schemaTest">
+            <h3>2. Database Schema Test</h3>
+            <p>Checking if required tables exist...</p>
+            <button onclick="testSchema()">Test Schema</button>
+            <div class="log" id="schemaLog"></div>
+        </div>
+        
+        <div class="test-section pending" id="authTest">
+            <h3>3. Authentication Test</h3>
+            <p>Test user authentication (optional):</p>
+            <input type="email" id="testEmail" placeholder="Admin email" style="margin: 5px; padding: 8px;">
+            <input type="password" id="testPassword" placeholder="Password" style="margin: 5px; padding: 8px;">
+            <button onclick="testAuth()">Test Login</button>
+            <div class="log" id="authLog"></div>
+        </div>
+        
+        <div class="test-section pending" id="dataTest">
+            <h3>4. Data Operations Test</h3>
+            <p>Test creating and reading data...</p>
+            <button onclick="testDataOperations()">Test Data Operations</button>
+            <div class="log" id="dataLog"></div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <h3>Next Steps:</h3>
+            <ol>
+                <li>If connection fails: Check your Supabase URL and API key</li>
+                <li>If schema fails: Run the SQL from <code>supabase-schema.sql</code> in your Supabase SQL Editor</li>
+                <li>If auth fails: Create an admin user and role in Supabase</li>
+                <li>If data fails: Check RLS policies and permissions</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script>
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logElement.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateTestStatus(testId, status) {
+            const element = document.getElementById(testId);
+            element.className = `test-section ${status}`;
+        }
+
+        async function testConnection() {
+            const logId = 'connectionLog';
+            const testId = 'connectionTest';
+            
+            try {
+                log(logId, 'Testing Supabase connection...');
+                
+                // Check if supabase client is initialized
+                if (!window.supabase || !supabase) {
+                    throw new Error('Supabase client not found. Check if supabase-config.js loaded correctly.');
+                }
+                
+                log(logId, `Supabase URL: ${SUPABASE_URL}`);
+                log(logId, `API Key: ${SUPABASE_ANON_KEY.substring(0, 20)}...`);
+                
+                // Test basic connection
+                const { data, error } = await supabase.from('categories').select('count').limit(1);
+                
+                if (error) {
+                    if (error.message.includes('relation "categories" does not exist')) {
+                        log(logId, 'Connection successful, but schema not set up yet.', 'success');
+                        updateTestStatus(testId, 'success');
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    log(logId, 'Connection successful!', 'success');
+                    updateTestStatus(testId, 'success');
+                }
+                
+            } catch (error) {
+                log(logId, `Connection failed: ${error.message}`, 'error');
+                updateTestStatus(testId, 'error');
+            }
+        }
+
+        async function testSchema() {
+            const logId = 'schemaLog';
+            const testId = 'schemaTest';
+            
+            try {
+                log(logId, 'Testing database schema...');
+                
+                const tables = ['categories', 'articles', 'contacts', 'subscribers', 'user_roles'];
+                let allTablesExist = true;
+                
+                for (const table of tables) {
+                    try {
+                        const { error } = await supabase.from(table).select('count').limit(1);
+                        if (error) {
+                            log(logId, `❌ Table '${table}' does not exist`, 'error');
+                            allTablesExist = false;
+                        } else {
+                            log(logId, `✅ Table '${table}' exists`, 'success');
+                        }
+                    } catch (err) {
+                        log(logId, `❌ Error checking table '${table}': ${err.message}`, 'error');
+                        allTablesExist = false;
+                    }
+                }
+                
+                if (allTablesExist) {
+                    log(logId, 'All required tables exist!', 'success');
+                    updateTestStatus(testId, 'success');
+                } else {
+                    log(logId, 'Some tables are missing. Please run supabase-schema.sql', 'error');
+                    updateTestStatus(testId, 'error');
+                }
+                
+            } catch (error) {
+                log(logId, `Schema test failed: ${error.message}`, 'error');
+                updateTestStatus(testId, 'error');
+            }
+        }
+
+        async function testAuth() {
+            const logId = 'authLog';
+            const testId = 'authTest';
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            
+            if (!email || !password) {
+                log(logId, 'Please enter email and password', 'error');
+                return;
+            }
+            
+            try {
+                log(logId, `Testing authentication for ${email}...`);
+                
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                log(logId, 'Authentication successful!', 'success');
+                log(logId, `User ID: ${data.user.id}`);
+                
+                // Test admin role
+                const { data: roleData, error: roleError } = await supabase
+                    .from('user_roles')
+                    .select('role')
+                    .eq('user_id', data.user.id)
+                    .single();
+                
+                if (roleError) {
+                    log(logId, 'No role found for user. Please set up admin role.', 'error');
+                } else {
+                    log(logId, `User role: ${roleData.role}`, 'success');
+                    if (roleData.role === 'admin') {
+                        updateTestStatus(testId, 'success');
+                    }
+                }
+                
+                // Sign out
+                await supabase.auth.signOut();
+                
+            } catch (error) {
+                log(logId, `Authentication failed: ${error.message}`, 'error');
+                updateTestStatus(testId, 'error');
+            }
+        }
+
+        async function testDataOperations() {
+            const logId = 'dataLog';
+            const testId = 'dataTest';
+            
+            try {
+                log(logId, 'Testing data operations...');
+                
+                // Test reading categories
+                const { data: categories, error: catError } = await supabase
+                    .from('categories')
+                    .select('*')
+                    .limit(5);
+                
+                if (catError) {
+                    throw catError;
+                }
+                
+                log(logId, `Found ${categories.length} categories`, 'success');
+                
+                // Test reading articles
+                const { data: articles, error: artError } = await supabase
+                    .from('articles')
+                    .select('*')
+                    .limit(5);
+                
+                if (artError) {
+                    throw artError;
+                }
+                
+                log(logId, `Found ${articles.length} articles`, 'success');
+                
+                // Test newsletter subscription (public operation)
+                const testEmail = `test-${Date.now()}@example.com`;
+                const { data: subData, error: subError } = await supabase
+                    .from('subscribers')
+                    .insert([{
+                        email: testEmail,
+                        subscribed_at: new Date().toISOString(),
+                        is_active: true
+                    }])
+                    .select()
+                    .single();
+                
+                if (subError) {
+                    log(logId, `Subscription test failed: ${subError.message}`, 'error');
+                } else {
+                    log(logId, 'Newsletter subscription test successful', 'success');
+                    
+                    // Clean up test data
+                    await supabase.from('subscribers').delete().eq('email', testEmail);
+                }
+                
+                updateTestStatus(testId, 'success');
+                
+            } catch (error) {
+                log(logId, `Data operations failed: ${error.message}`, 'error');
+                updateTestStatus(testId, 'error');
+            }
+        }
+
+        // Auto-run connection test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testConnection, 1000);
+        });
+    </script>
+</body>
+</html>
