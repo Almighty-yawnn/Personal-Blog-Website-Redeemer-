@@ -63,9 +63,6 @@ async function loadArticle() {
         // Load related content
         await loadRelatedContent();
         
-        // Track article view
-        await trackView(articleId);
-        
     } catch (error) {
         console.error('Error loading article:', error);
         showError();
@@ -76,39 +73,45 @@ async function loadArticle() {
 
 async function loadArticleById(articleId) {
     try {
-        // Check if Supabase is properly configured
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-            console.warn('Supabase not configured, using fallback data');
-            loadFallbackArticle(articleId);
-            return;
-        }
-        
         // Fetch article from Supabase
-        currentArticle = await SupabaseDB.getArticleById(articleId);
-        
-        if (currentArticle) {
-            // Transform Supabase data
-            currentArticle = {
-                id: currentArticle.id,
-                title: currentArticle.title,
-                excerpt: currentArticle.excerpt,
-                category: currentArticle.categories?.slug || 'uncategorized',
-                categoryName: currentArticle.categories?.name || 'Uncategorized',
-                date: currentArticle.published_at || currentArticle.created_at,
-                author: currentArticle.author_name,
-                image: currentArticle.featured_image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=400&fit=crop',
-                content: currentArticle.content,
-                status: currentArticle.status,
-                tags: currentArticle.tags || [],
-                views: currentArticle.view_count || 0
-            };
+        let article = await SupabaseDB.getArticleById(articleId);
+
+        if (!article) {
+            console.warn('Article not found, using fallback data');
+            currentArticle = await loadFallbackArticle(articleId);
+            return currentArticle;
+        }
+
+        // Transform Supabase data
+        currentArticle = {
+            id: article.id,
+            title: article.title,
+            excerpt: article.excerpt,
+            category: article.categories?.slug || 'uncategorized',
+            categoryName: article.categories?.name || 'Uncategorized',
+            date: article.published_at || article.created_at,
+            author: article.author_name || 'Redeemer Buatsi',
+            image: article.featured_image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=400&fit=crop',
+            content: article.content,
+            status: article.status || 'draft',
+            tags: article.tags || [],
+            views: article.view_count || 0
+        };
+
+        // Track the view
+        if (currentArticle && currentArticle.id) {
+            await trackView(currentArticle.id);
         }
         
+        return currentArticle;
+
     } catch (error) {
         console.error('Error fetching article from Supabase:', error);
-        loadFallbackArticle(articleId);
+        currentArticle = await loadFallbackArticle(articleId);
+        return currentArticle;
     }
 }
+
 
 function loadFallbackArticle(articleId) {
     // Fallback articles if Supabase is not available
@@ -269,56 +272,75 @@ function displayArticle() {
 
 async function loadRelatedContent() {
     try {
-        // Load all articles for navigation and related content
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-            const fetchedArticles = await SupabaseDB.getArticles({ limit: 100 });
-            allArticles = fetchedArticles.map(article => ({
-                id: article.id,
-                title: article.title,
-                excerpt: article.excerpt,
-                category: article.categories?.slug || 'uncategorized',
-                categoryName: article.categories?.name || 'Uncategorized',
-                date: article.published_at || article.created_at,
-                author: article.author_name,
-                image: article.featured_image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=250&fit=crop'
-            }));
-        } else {
-            // Use fallback articles
-            allArticles = [
-                {
-                    id: '1',
-                    title: "Ghana's Economic Outlook: Navigating Post-Pandemic Recovery",
-                    category: "business",
-                    categoryName: "Business",
-                    date: "2024-01-15"
-                },
-                {
-                    id: '2',
-                    title: "Digital Transformation in Ghanaian Media: Opportunities and Challenges",
-                    category: "technology",
-                    categoryName: "Technology",
-                    date: "2024-01-12"
-                },
-                {
-                    id: '3',
-                    title: "Youth Engagement in Ghana's Democratic Process: A New Generation's Voice",
-                    category: "politics",
-                    categoryName: "Politics",
-                    date: "2024-01-10"
-                }
-            ];
+        // Fetch articles from Supabase if configured
+        let fetchedArticles = [];
+        if (
+            SUPABASE_URL !== 'https://bxusfjvtccvkpwlxupiq.supabase.co' &&
+            SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kVQ'
+        ) {
+            fetchedArticles = await SupabaseDB.getArticles({ limit: 100 });
         }
-        
-        // Setup article navigation
+
+        // Map fetched articles or fallback to defaults
+        allArticles = (fetchedArticles.length ? fetchedArticles : getFallbackArticles()).map(article => ({
+            id: article.id || '0',
+            title: article.title || 'Untitled Article',
+            excerpt: article.excerpt || '',
+            category: article.categories?.slug || 'uncategorized',
+            categoryName: article.categories?.name || 'Uncategorized',
+            date: article.published_at || article.created_at || new Date().toISOString(),
+            author: article.author_name || 'Unknown',
+            image: article.featured_image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=250&fit=crop'
+        }));
+
+        // Setup navigation and related articles
         setupArticleNavigation();
-        
-        // Setup related articles
         setupRelatedArticles();
-        
+
     } catch (error) {
         console.error('Error loading related content:', error);
+        allArticles = getFallbackArticles();
+        setupArticleNavigation();
+        setupRelatedArticles();
     }
 }
+
+// Fallback articles function
+function getFallbackArticles() {
+    return [
+        {
+            id: '1',
+            title: "Ghana's Economic Outlook: Navigating Post-Pandemic Recovery",
+            category: "business",
+            categoryName: "Business",
+            date: "2024-01-15",
+            author: "Redeemer Buatsi",
+            excerpt: "",
+            image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=250&fit=crop"
+        },
+        {
+            id: '2',
+            title: "Digital Transformation in Ghanaian Media: Opportunities and Challenges",
+            category: "technology",
+            categoryName: "Technology",
+            date: "2024-01-12",
+            author: "Redeemer Buatsi",
+            excerpt: "",
+            image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=250&fit=crop"
+        },
+        {
+            id: '3',
+            title: "Youth Engagement in Ghana's Democratic Process: A New Generation's Voice",
+            category: "politics",
+            categoryName: "Politics",
+            date: "2024-01-10",
+            author: "Redeemer Buatsi",
+            excerpt: "",
+            image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=250&fit=crop"
+        }
+    ];
+}
+
 
 function setupArticleNavigation() {
     if (!currentArticle || allArticles.length === 0) return;
@@ -375,7 +397,7 @@ function setupRelatedArticles() {
 
 async function trackView(articleId) {
     try {
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+        if (SUPABASE_URL !== 'https://bxusfjvtccvkpwlxupiq.supabase.co' && SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kYVQ') {
             await SupabaseDB.trackArticleView(articleId, navigator.userAgent);
         }
     } catch (error) {
@@ -439,26 +461,35 @@ function toggleMobileMenu() {
 
 async function handleNewsletterSubmission(e) {
     e.preventDefault();
-    const email = e.target.querySelector('input[type="email"]').value;
+    const emailInput = e.target.querySelector('input[type="email"]');
+    const email = emailInput.value.trim();
     const button = e.target.querySelector('button');
-    
+
+    // Simple email validation regex
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        showToast('Please enter a valid email address.', 'error');
+        emailInput.focus();
+        return;
+    }
+
     // Show loading state
     const originalText = button.textContent;
     button.innerHTML = '<span class="loading"></span> Subscribing...';
     button.disabled = true;
-    
+
     try {
-        // Try to submit to Supabase
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+        // Submit to Supabase or simulate
+        if (SUPABASE_URL !== 'https://bxusfjvtccvkpwlxupiq.supabase.co' &&
+            SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kYVQ') {
             await SupabaseDB.addSubscriber(email);
         } else {
-            // Simulate success for demo
             await new Promise(resolve => setTimeout(resolve, 1500));
         }
-        
+
         showToast('Successfully subscribed to newsletter!', 'success');
         e.target.reset();
-        
+
     } catch (error) {
         console.error('Newsletter subscription error:', error);
         if (error.message.includes('duplicate')) {
@@ -471,6 +502,7 @@ async function handleNewsletterSubmission(e) {
         button.disabled = false;
     }
 }
+
 
 // Utility functions
 function formatDate(dateString) {

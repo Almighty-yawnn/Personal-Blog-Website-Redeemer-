@@ -92,44 +92,59 @@ class SupabaseAuth {
 class SupabaseDB {
     // Articles CRUD operations
     static async getArticles(options = {}) {
-        let query = supabase
-            .from(TABLES.ARTICLES)
-            .select(`
-                *,
-                categories(name, slug)
-            `)
-            .eq('status', 'published')
-            .order('created_at', { ascending: false });
-        
-        if (options.limit) {
-            query = query.limit(options.limit);
+        try {
+            let query = supabase
+                .from(TABLES.ARTICLES)
+                .select(`
+                    *,
+                    categories(name, slug)
+                `)
+                .eq('status', 'published')
+                .order('created_at', { ascending: false });
+            
+            if (options.limit) query = query.limit(options.limit);
+            if (options.offset) query = query.range(options.offset, options.offset + options.limit - 1);
+            if (options.category) query = query.eq('category_id', options.category);
+            
+            const { data, error, status } = await query;
+            
+            if (error) throw error;
+            return data || [];
+            
+        } catch (error) {
+            console.error('Error fetching articles:', error);
+            return [];
         }
-        
-        if (options.offset) {
-            query = query.range(options.offset, options.offset + options.limit - 1);
-        }
-        
-        if (options.category) {
-            query = query.eq('category_id', options.category);
-        }
-        
-        const { data, error } = await query;
-        if (error) throw error;
-        return data;
     }
     
     static async getArticleById(id) {
-        const { data, error } = await supabase
-            .from(TABLES.ARTICLES)
-            .select(`
-                *,
-                categories(name, slug)
-            `)
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
+        try {
+            console.log(`Fetching article with ID: ${id}`);
+            const { data, error, status } = await supabase
+                .from(TABLES.ARTICLES)
+                .select(`
+                    *,
+                    categories!left(*)
+                `)
+                .eq('id', id)
+                .single();
+            
+            if (error) {
+                console.error('Supabase error:', error);
+                if (error.code === 'PGRST116') { // No rows returned
+                    console.log('No article found with ID:', id);
+                    return null;
+                }
+                throw error;
+            }
+            
+            console.log('Retrieved article:', data);
+            return data;
+            
+        } catch (error) {
+            console.error('Error in getArticleById:', error);
+            return null;
+        }
     }
     
     static async getAllArticlesForAdmin() {

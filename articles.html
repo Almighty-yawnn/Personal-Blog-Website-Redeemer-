@@ -11,29 +11,16 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
     <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <div class="nav-container">
-                <div class="logo">
-                    <h1>Redeemer Buatsi</h1>
-                    <p>Journalist & Media Professional</p>
-                </div>
-                <ul class="nav-menu">
-                    <li><a href="index.html" class="nav-link">Home</a></li>
-                    <li><a href="index.html#about" class="nav-link">About</a></li>
-                    <li><a href="articles.html" class="nav-link active">Articles</a></li>
-                    <li><a href="index.html#contact" class="nav-link">Contact</a></li>
-                    <li><a href="admin.html" class="nav-link admin-link">Admin</a></li>
-                </ul>
-                <div class="hamburger">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </div>
-            </div>
-        </nav>
-    </header>
+    <div id="header"></div>
+    <script>
+        fetch("header.html")
+    .then(response => response.text())
+    .then(data => {
+    document.getElementById("header").innerHTML = data;
+    });
+    </script>
 
     <!-- Main Content -->
     <main style="padding-top: 100px;">
@@ -41,7 +28,7 @@
         <section class="articles-hero">
             <div class="container">
                 <h1>All Articles</h1>
-                <p>Insights on Ghana's politics, economy, technology, and society</p>
+                <p>Insights on Ghana's Politics, Economy, Technology, and Society</p>
             </div>
         </section>
 
@@ -97,45 +84,14 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Redeemer Buatsi</h3>
-                    <p>Experienced journalist covering Ghana's political landscape, economic developments, and social issues.</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="articles.html">All Articles</a></li>
-                        <li><a href="index.html#about">About</a></li>
-                        <li><a href="index.html#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Categories</h4>
-                    <ul>
-                        <li><a href="#" data-category="politics">Politics</a></li>
-                        <li><a href="#" data-category="business">Business</a></li>
-                        <li><a href="#" data-category="technology">Technology</a></li>
-                        <li><a href="#" data-category="society">Society</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Connect</h4>
-                    <div class="social-links">
-                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 Redeemer Buatsi. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <div id="footer"></div>
+    <script>
+        fetch("footer.html")
+    .then(response => response.text())
+    .then(data => {
+    document.getElementById("footer").innerHTML = data;
+    });
+    </script>
 
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay" style="display: none;">

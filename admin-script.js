@@ -131,19 +131,28 @@ function setupEventListeners() {
     setupRichTextEditor();
     
     // Media upload
-    setupMediaUpload();
+    function setupMediaUpload() {
+        const uploadBtn = document.getElementById('uploadMediaBtn'); // Assuming ID from HTML
+        const uploadModal = document.getElementById('uploadModal');
+        const closeModal = uploadModal.querySelector('.close'); // Assuming close button class
+        const fileInput = document.getElementById('mediaUploadInput');
+        const uploadArea = document.getElementById('uploadArea');
     
+        if (!uploadBtn || !uploadModal || !fileInput || !uploadArea) return;
+    }
+    setupMediaUpload();
+
     // Settings
     const saveSettingsBtn = document.getElementById('saveSettingsBtn');
     if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', saveSettings);
-    
+
     // Search and filters
     const articleSearch = document.getElementById('articleSearch');
     const categoryFilter = document.getElementById('categoryFilter');
-    
+
     if (articleSearch) articleSearch.addEventListener('input', filterArticles);
     if (categoryFilter) categoryFilter.addEventListener('change', filterArticles);
-    
+
     // Auth state change listener
     SupabaseAuth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN') {
@@ -248,7 +257,7 @@ function showAdminInterface() {
 function updateUserInfo() {
     if (currentUser) {
         userInfo.style.display = 'inline-block';
-        userName.textContent = currentUser.email;
+        userName.textContent = currentUser.user_metadata?.full_name || 'Redeemer Buatsi';
         
         // Update author field
         const authorField = document.getElementById('articleAuthor');
@@ -280,7 +289,9 @@ function showSection(sectionName) {
             loadArticlesTable();
             break;
         case 'new-article':
-            resetArticleForm();
+            if (!currentEditingArticle) {
+                resetArticleForm();
+            }
             break;
         case 'media':
             loadMediaLibrary();
@@ -487,6 +498,8 @@ async function editArticle(articleId) {
         
         currentEditingArticle = article;
         
+        showSection('new-article');
+        
         // Fill form with article data
         document.getElementById('articleTitle').value = article.title;
         document.getElementById('articleCategory').value = article.category_id || '';
@@ -495,8 +508,6 @@ async function editArticle(articleId) {
         document.getElementById('articleContent').innerHTML = article.content;
         document.getElementById('articleTags').value = article.tags ? article.tags.join(', ') : '';
         document.getElementById('articleAuthor').value = article.author_name;
-        
-        showSection('new-article');
         
         // Update section header
         const sectionHeader = document.querySelector('#new-article-section .section-header h1');
@@ -588,9 +599,204 @@ function setupRichTextEditor() {
 }
 
 function setupMediaUpload() {
-    // Keep existing media upload functionality
-    // This would be enhanced to upload to Supabase Storage in a full implementation
+    const uploadBtn = document.getElementById('uploadMediaBtn'); // Assuming ID from HTML
+    const uploadModal = document.getElementById('uploadModal');
+    const closeModal = uploadModal.querySelector('.close'); // Assuming close button class
+    const fileInput = document.getElementById('mediaUploadInput');
+    const uploadArea = document.getElementById('uploadArea');
+
+    if (!uploadBtn || !uploadModal || !fileInput || !uploadArea) return;
+
+    // Open modal on button click
+    uploadBtn.addEventListener('click', () => {
+        uploadModal.style.display = 'block';
+    });
+
+    // Close modal
+    closeModal.addEventListener('click', () => {
+        uploadModal.style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target === uploadModal) uploadModal.style.display = 'none';
+    });
+
+    // Handle file input change
+    fileInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+        for (const file of files) {
+            uploadFile(file);
+        }
+        uploadModal.style.display = 'none'; // Close after upload
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover'); // Add CSS class for highlight
+    });
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        for (const file of files) {
+            uploadFile(file);
+        }
+        uploadModal.style.display = 'none';
+    });
+
+    // Handle copy and delete in grid
+    mediaGrid.addEventListener('click', (e) => {
+        if (e.target.closest('.copy-link')) {
+            const btn = e.target.closest('.copy-link');
+            const url = btn.dataset.url;
+            navigator.clipboard.writeText(url);
+            showToast('Link copied to clipboard!', 'success');
+        } else if (e.target.closest('.delete-media')) {
+            const btn = e.target.closest('.delete-media');
+            const url = btn.dataset.url;
+            const element = btn.closest('.media-item');
+            deleteMedia(url, element);
+        }
+    });
 }
+
+// Update the uploadFile function in admin-script.js
+async function uploadFile(file) {
+    try {
+        // Generate a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const filePath = `media/${fileName}`;
+
+        // Show loading state
+        showLoading(true, 'Uploading file...');
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+            .from('media') // Your bucket name
+            .upload(filePath, file);
+
+        if (error) {
+            throw error;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('media')
+            .getPublicUrl(filePath);
+
+        // Add to media grid
+        addMediaToGrid(publicUrl, file.type);
+        
+        // Show success message
+        showToast('File uploaded successfully!', 'success');
+    } catch (error) {
+        console.error('Upload error:', error);
+        showToast('Error uploading file: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Update the deleteMedia function
+async function deleteMedia(url, element) {
+    if (!confirm('Are you sure you want to delete this file?')) return;
+
+    try {
+        // Extract the file path from the URL
+        const urlObj = new URL(url);
+        const pathParts = urlObj.pathname.split('/');
+        const filePath = pathParts.slice(pathParts.indexOf('media')).join('/');
+
+        // Delete from Supabase Storage
+        const { error } = await supabase.storage
+            .from('media')
+            .remove([filePath]);
+
+        if (error) throw error;
+
+        // Remove from UI
+        element.remove();
+        showToast('File deleted successfully!', 'success');
+    } catch (error) {
+        console.error('Delete error:', error);
+        showToast('Error deleting file: ' + error.message, 'error');
+    }
+}
+
+// Add this new function (referenced in uploadFile)
+function addMediaToGrid(url, type) {
+    const mediaItem = document.createElement('div');
+    mediaItem.className = 'media-item';
+    mediaItem.innerHTML = `
+        <img src="${url}" alt="Uploaded media">
+        <div class="media-actions">
+            <button class="copy-link" data-url="${url}">
+                <i class="fas fa-link"></i>
+            </button>
+            <button class="delete-media" data-url="${url}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    mediaGrid.prepend(mediaItem); // Add to top of grid
+}
+
+// Add this function to load existing media
+async function loadMedia() {
+    try {
+        showLoading(true, 'Loading media...');
+        
+        const { data: files, error } = await supabase.storage
+            .from('media')
+            .list('', {
+                limit: 100,
+                offset: 0,
+                sortBy: { column: 'created_at', order: 'desc' }
+            });
+
+        if (error) throw error;
+
+        // Clear existing media grid
+        mediaGrid.innerHTML = '';
+
+        // Add each file to the grid
+        for (const file of files) {
+            const { data: { publicUrl } } = supabase.storage
+                .from('media')
+                .getPublicUrl(file.name);
+            
+            const mediaItem = document.createElement('div');
+            mediaItem.className = 'media-item';
+            mediaItem.innerHTML = `
+                <img src="${publicUrl}" alt="${file.name}">
+                <div class="media-actions">
+                    <button class="copy-link" data-url="${publicUrl}">
+                        <i class="fas fa-link"></i>
+                    </button>
+                    <button class="delete-media" data-url="${publicUrl}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            mediaGrid.appendChild(mediaItem);
+        }
+    } catch (error) {
+        console.error('Error loading media:', error);
+        showToast('Error loading media: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Call loadMedia when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+    loadMedia();
+});
 
 async function saveSettings() {
     // Implementation for saving settings to Supabase
@@ -603,6 +809,7 @@ function loadSettings() {
 
 function loadMediaLibrary() {
     // Implementation for loading media from Supabase Storage
+    loadMedia(); // Call the existing loadMedia to populate grid
 }
 
 // Utility functions

@@ -133,10 +133,25 @@ function loadFallbackArticles() {
 
 async function loadCategories() {
     try {
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-            const categories = await SupabaseDB.getCategories();
-            updateCategoryFilter(categories);
+        // Check if Supabase is properly configured
+        if (SUPABASE_URL === 'https://bxusfjvtccvkpwlxupiq.supabase.co' || 
+            SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kYVQ') {
+            
+            console.warn('Supabase not configured, using default categories');
+            const defaultCategories = [
+                { slug: 'politics', name: 'Politics' },
+                { slug: 'business', name: 'Business' },
+                { slug: 'technology', name: 'Technology' },
+                { slug: 'society', name: 'Society' }
+            ];
+            updateCategoryFilter(defaultCategories);
+            return;
         }
+
+        // Load categories from Supabase
+        const categories = await SupabaseDB.getCategories();
+        updateCategoryFilter(categories);
+
     } catch (error) {
         console.error('Error loading categories:', error);
         // Use default categories
@@ -149,6 +164,7 @@ async function loadCategories() {
         updateCategoryFilter(defaultCategories);
     }
 }
+
 
 function updateCategoryFilter(categories) {
     categoryFilterSelect.innerHTML = '<option value="all">All Categories</option>';
@@ -408,7 +424,7 @@ function showToast(message, type = 'info') {
 
 // Auto-refresh articles every 30 seconds to catch new publications
 setInterval(async () => {
-    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+    if (SUPABASE_URL !== 'https://bxusfjvtccvkpwlxupiq.supabase.co' && SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kYVQ') {
         try {
             const currentCount = allArticles.length;
             await loadAllArticles();

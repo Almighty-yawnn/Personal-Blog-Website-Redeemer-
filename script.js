@@ -25,16 +25,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function initializeSupabase() {
     try {
-        // Check if Supabase is properly configured
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+        // Check if Supabase variables are missing or not set
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
             console.warn('Supabase not configured, using fallback data');
             loadFallbackArticles();
             return;
         }
-        
-        // Load articles from Supabase
+
+        // Try loading articles from Supabase
         await loadArticles();
-        
+
     } catch (error) {
         console.error('Error initializing Supabase:', error);
         loadFallbackArticles();
@@ -212,39 +212,55 @@ async function openArticle(articleId) {
 
 async function handleNewsletterSubmission(e) {
     e.preventDefault();
-    const email = e.target.querySelector('input[type="email"]').value;
-    const button = e.target.querySelector('button');
-    
-    // Show loading state
+    const form = e.target;
+    const email = form.querySelector('input[type="email"]').value.trim();
+    const button = form.querySelector('button');
+
+    if (!email) {
+        showToast('Please enter a valid email address.', 'warning');
+        return;
+    }
+
+    // Save original button text
     const originalText = button.textContent;
-    button.innerHTML = '<span class="loading"></span> Subscribing...';
+
+    // Show loading state
+    button.innerHTML = `<span class="loading"></span> <strong>Subscribing...</strong>`;
     button.disabled = true;
-    
+
     try {
-        // Try to submit to Supabase
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+        // Check if Supabase keys are real
+        const usingDemoKeys =
+            SUPABASE_URL === 'https://bxusfjvtccvkpwlxupiq.supabase.co' &&
+            SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kYVQ';
+
+        if (!usingDemoKeys) {
             await SupabaseDB.addSubscriber(email);
-            showToast('Successfully subscribed to newsletter!', 'success');
+            showToast('🎉 Successfully subscribed to our newsletter!', 'success');
         } else {
-            // Simulate success for demo
+            // Fake delay for demo mode
             await new Promise(resolve => setTimeout(resolve, 1500));
-            showToast('Successfully subscribed to newsletter!', 'success');
+            showToast('🎉 Successfully subscribed to our newsletter!', 'success');
         }
-        
-        e.target.reset();
-        
+
+        form.reset();
+
     } catch (error) {
         console.error('Newsletter subscription error:', error);
-        if (error.message.includes('duplicate')) {
-            showToast('You are already subscribed to our newsletter.', 'info');
+
+        if (error.message.toLowerCase().includes('duplicate')) {
+            showToast('ℹ️ You are already subscribed to our newsletter.', 'info');
         } else {
-            showToast('Error subscribing to newsletter. Please try again.', 'error');
+            showToast('❌ Error subscribing. Please try again later.', 'error');
         }
+
     } finally {
+        // Restore button state
         button.textContent = originalText;
         button.disabled = false;
     }
 }
+
 
 async function handleContactSubmission(e) {
     e.preventDefault();
@@ -265,7 +281,7 @@ async function handleContactSubmission(e) {
         };
         
         // Try to submit to Supabase
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+        if (SUPABASE_URL !== 'https://bxusfjvtccvkpwlxupiq.supabase.co' && SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kYVQ') {
             await SupabaseDB.submitContact(contactData);
             showToast('Message sent successfully! We will get back to you soon.', 'success');
         } else {
@@ -287,17 +303,17 @@ async function handleContactSubmission(e) {
 
 async function handleSearch() {
     const query = searchInput.value.toLowerCase().trim();
-    
+
     if (query.length < 2) {
         searchResults.innerHTML = '';
         return;
     }
-    
+
     try {
         let results = [];
-        
-        // Try to search using Supabase
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+
+        // ✅ Check if Supabase credentials are provided
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
             const supabaseResults = await SupabaseDB.searchArticles(query, 10);
             results = supabaseResults.map(article => ({
                 id: article.id,
@@ -308,7 +324,7 @@ async function handleSearch() {
                 content: article.content
             }));
         } else {
-            // Fallback to local search
+            // 🔄 Fallback to local search
             results = articles.filter(article => 
                 article.title.toLowerCase().includes(query) ||
                 article.excerpt.toLowerCase().includes(query) ||
@@ -316,12 +332,13 @@ async function handleSearch() {
                 article.content.toLowerCase().includes(query)
             );
         }
-        
+
         displaySearchResults(results);
-        
+
     } catch (error) {
         console.error('Search error:', error);
-        // Fallback to local search
+
+        // 🔄 If Supabase search fails, fallback to local
         const results = articles.filter(article => 
             article.title.toLowerCase().includes(query) ||
             article.excerpt.toLowerCase().includes(query) ||
@@ -331,6 +348,7 @@ async function handleSearch() {
         displaySearchResults(results);
     }
 }
+
 
 function displaySearchResults(results) {
     if (results.length === 0) {
@@ -540,7 +558,7 @@ document.addEventListener('keydown', function(e) {
 // Add search shortcut hint
 setTimeout(() => {
     const searchHint = document.createElement('div');
-    searchHint.innerHTML = '<small style="color: #7f8c8d;">Press Ctrl + K to search</small>';
+    searchHint.innerHTML = '<small style="color:rgb(36, 212, 224);">Press Ctrl + K to search</small>';
     searchHint.style.cssText = `
         position: fixed;
         bottom: 20px;
@@ -560,3 +578,45 @@ setTimeout(() => {
         }
     }, 5000);
 }, 2000);
+
+
+const text = "Connecting Data, People, and Ideas through Research, Communication, and Strategic Thinking";
+const typingElement = document.getElementById("typing-text");
+
+let i = 0;
+let isDeleting = false;
+
+function typeEffect() {
+    if (!isDeleting) {
+    typingElement.textContent = text.substring(0, i + 1);
+    i++;
+    if (i === text.length) {
+        isDeleting = true;
+        setTimeout(typeEffect, 3000); // pause before deleting
+        return;
+    }
+    } else {
+    typingElement.textContent = text.substring(0, i - 1);
+    i--;
+    if (i === 0) {
+        isDeleting = false;
+    }
+    }
+    setTimeout(typeEffect, isDeleting ? 100 : 100); // speed control
+}
+
+typeEffect();
+
+setInterval(async () => {
+    try {
+        const currentCount = articles.length;
+        await loadArticles(); // Refetch from Supabase
+        if (articles.length > currentCount) {
+            filteredArticles = [...articles]; // Update filtered list
+            displayArticles(); // Redisplay on homepage
+            showToast(`${articles.length - currentCount} new articles published!`, 'success');
+        }
+    } catch (error) {
+        console.error('Error refreshing articles:', error);
+    }
+}, 30000); // Poll every 30 seconds

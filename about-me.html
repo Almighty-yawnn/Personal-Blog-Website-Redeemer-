@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me - Redeemer Buatsi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <div id="header"></div>
+    <script>
+        fetch("header.html")
+    .then(response => response.text())
+    .then(data => {
+    document.getElementById("header").innerHTML = data;
+    });
+    </script>
+    
+    <!-- About Me Hero Section -->
+    <section class="about-me-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>About Me</h1>
+                <p class="hero-subtitle" id="typing-text"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main About Me Content -->
+    <section class="about-me-content">
+        <div class="container">
+            <div class="content-grid">
+                <div class="main-content">
+                    <!-- Profile Picture Section -->
+                    <div class="profile-picture">
+                        <img src="assets/pic2.jpg" alt="Redeemer Buatsi">
+                    </div>
+                    
+                    <!-- Introduction -->
+                    <div class="content-section">
+                        <h2>Who I Am</h2>
+                        <p>I'm Redeemer Buatsi, a communication and research analyst with a cross-disciplinary background in data analytics, digital communication, and social research. Currently pursuing an MSc in Informatics and a second MSc in Communication at the University of Louisiana at Lafayette, I combine technical skills with strong storytelling and analytical thinking to uncover insights that drive impact.</p>
+                    </div>
+
+                    <!-- Academic Background -->
+                    <div class="content-section">
+                        <h2><i class="fas fa-graduation-cap"></i> Academic Journey</h2>
+                        <div class="education-item">
+                            <h3>University of Louisiana at Lafayette</h3>
+                            <p><strong>MSc in Informatics</strong> (In Progress)</p>
+                            <p><strong>MSc in Communication</strong> (In Progress)</p>
+                            <p>Developing expertise in data science, information systems, and strategic communication</p>
+                        </div>
+                        <div class="education-item">
+                            <h3>Ghana Institute of Journalism</h3>
+                            <p><strong>Journalism and Development Communication</strong></p>
+                            <p>Foundation in media ethics, investigative reporting, and development-focused communication</p>
+                        </div>
+                        <div class="education-item">
+                            <h3>NLA University College, Norway</h3>
+                            <p><strong>International Experience</strong></p>
+                            <p>Gained global perspective on communication practices and cross-cultural understanding</p>
+                        </div>
+                    </div>
+
+                    <!-- Professional Experience -->
+                    <div class="content-section">
+                        <h2><i class="fas fa-briefcase"></i> Professional Impact</h2>
+                        <div class="experience-grid">
+                            <div class="experience-item">
+                                <h3>European Union Election Observation Mission</h3>
+                                <p><strong>Election Observer</strong></p>
+                                <p>Contributed to democratic processes through systematic observation and reporting on electoral procedures, ensuring transparency and accountability in democratic governance.</p>
+                            </div>
+                            <div class="experience-item">
+                                <h3>IMANI Africa</h3>
+                                <p><strong>Research Analyst</strong></p>
+                                <p>Conducted policy research and analysis on governance, economics, and social issues across Africa, contributing to evidence-based policy recommendations.</p>
+                            </div>
+                            <div class="experience-item">
+                                <h3>Media Foundation for West Africa</h3>
+                                <p><strong>Fact-Checker</strong></p>
+                                <p>Verified information accuracy and combated misinformation through rigorous fact-checking processes, promoting media literacy and truth in journalism.</p>
+                            </div>
+                            <div class="experience-item">
+                                <h3>Picard Center</h3>
+                                <p><strong>Research Support Specialist</strong></p>
+                                <p>Currently supporting research on gambling in Louisiana through content design, editing, and strategic communication, translating complex research into accessible insights.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Volunteer Work -->
+                    <div class="content-section">
+                        <h2><i class="fas fa-heart"></i> Community Engagement</h2>
+                        <div class="volunteer-item">
+                            <h3>Amnesty International Ghana</h3>
+                            <p><strong>Volunteer Social Media Manager</strong></p>
+                            <p>Lead digital campaigns to raise awareness on human rights issues, managing social media strategy and content creation to amplify voices for justice and human dignity.</p>
+                        </div>
+                    </div>
+
+                    <!-- Technical Skills -->
+                    <div class="content-section">
+                        <h2><i class="fas fa-code"></i> Technical Expertise</h2>
+                        <p>I bring a rare mix of qualitative depth and technical fluency, with certifications and hands-on experience in:</p>
+                        <div class="skills-grid">
+                            <div class="skill-category">
+                                <h3>Data Analytics</h3>
+                                <ul>
+                                    <li>Google Data Analytics Certification</li>
+                                    <li>Python Programming</li>
+                                    <li>R Statistical Computing</li>
+                                    <li>Excel Advanced Analytics</li>
+                                </ul>
+                            </div>
+                            <div class="skill-category">
+                                <h3>Research Tools</h3>
+                                <ul>
+                                    <li>CrowdTangle Social Media Analytics</li>
+                                    <li>Qualitative Research Methods</li>
+                                    <li>Survey Design & Analysis</li>
+                                    <li>Content Analysis</li>
+                                </ul>
+                            </div>
+                            <div class="skill-category">
+                                <h3>Communication</h3>
+                                <ul>
+                                    <li>Strategic Communication Planning</li>
+                                    <li>Digital Content Creation</li>
+                                    <li>Data Visualization</li>
+                                    <li>Cross-cultural Communication</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Closing Statement -->
+                    <div class="content-section closing-statement">
+                        <h2><i class="fas fa-handshake"></i> Let's Connect</h2>
+                        <p>If you're looking for someone who can connect data, people, and ideas—through writing, design, or strategy—I'd love to connect. Whether you're interested in collaborative research, strategic communication projects, or simply want to discuss the fascinating intersections of technology and society, I'm always open to meaningful conversations and new opportunities.</p>
+                        <div class="cta-buttons">
+                            <a href="index.html#contact" class="btn btn-primary">Get In Touch</a>
+                            <a href="articles.html" class="btn btn-secondary">Read My Work</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="sidebar-section">
+                        <h3>Quick Facts</h3>
+                        <ul class="fact-list">
+                            <li><i class="fas fa-map-marker-alt"></i> Based in Louisiana, USA</li>
+                            <li><i class="fas fa-globe"></i> International Experience</li>
+                            <li><i class="fas fa-graduation-cap"></i> Dual Master's Student</li>
+                            <li><i class="fas fa-certificate"></i> Google Data Analytics Certified</li>
+                            <li><i class="fas fa-language"></i> Multilingual Communicator</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>Areas of Interest</h3>
+                        <div class="interest-tags">
+                            <span class="tag">Data Analytics</span>
+                            <span class="tag">Digital Communication</span>
+                            <span class="tag">Social Research</span>
+                            <span class="tag">Policy Analysis</span>
+                            <span class="tag">Human Rights</span>
+                            <span class="tag">Technology & Society</span>
+                            <span class="tag">Democratic Governance</span>
+                            <span class="tag">Media Literacy</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>Connect With Me</h3>
+                        <div class="social-links-vertical">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i> Twitter</a>
+                            <a href="#" class="social-link"><i class="fas fa-envelope"></i> Email</a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i> GitHub</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+    <script>
+        fetch("footer.html")
+    .then(response => response.text())
+    .then(data => {
+    document.getElementById("footer").innerHTML = data;
+    });
+    </script>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

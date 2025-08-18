@@ -30,6 +30,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+    padding-top: 100px;
 }
 
 /* Typography */
@@ -64,6 +65,7 @@ h4 { font-size: 1.5rem; }
     cursor: pointer;
     transition: var(--transition);
     font-size: 1rem;
+    margin-top: 5%;
 }
 
 .btn-primary {
@@ -104,6 +106,8 @@ h4 { font-size: 1.5rem; }
 .header {
     position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     width: 100%;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -121,6 +125,21 @@ h4 { font-size: 1.5rem; }
     margin: 0 auto;
 }
 
+.logo a {
+    text-decoration: none;
+}
+
+.logo h1,
+.logo p {
+    margin: 0;
+    transition: color .25s ease;
+}
+
+/* apply gold only when the link is hovered */
+.logo a:hover h1,
+.logo a:hover p {
+    color: #ffd700;
+}
 .logo h1 {
     font-size: 1.8rem;
     color: var(--primary-color);
@@ -233,6 +252,15 @@ h4 { font-size: 1.5rem; }
     flex-wrap: wrap;
 }
 
+.hero-buttons-about {
+    display: flex;
+    justify-content: center; 
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    right: -30%;
+}
+
 .hero-image {
     text-align: center;
 }
@@ -249,6 +277,17 @@ h4 { font-size: 1.5rem; }
 .hero-image img:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    font-weight: 600; /* bold */
+    color: #fff; /* white */
+    font-family: 'Poppins', sans-serif; /* stylish Google font */
+    border-right: 2px solid #fff; /* cursor */
+    white-space: normal; /* allow wrapping */
+    word-break: break-word; /* wrap long words */
+    display: inline-block;
 }
 
 .scroll-indicator {
@@ -538,6 +577,16 @@ h4 { font-size: 1.5rem; }
     gap: 1rem;
 }
 
+.contact-item a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.contact-item a:hover {
+    color: #ffd700;
+}
+
+
 .contact-item i {
     font-size: 1.5rem;
     color: var(--primary-color);
@@ -635,6 +684,11 @@ h4 { font-size: 1.5rem; }
     transform: translateY(-2px);
 }
 
+.x-link {
+    font-weight: bold;
+    font-size: 20px;
+    text-decoration: none;
+}  
 .footer-bottom {
     text-align: center;
     padding-top: 2rem;
@@ -876,8 +930,10 @@ html {
 /* Article Detail Styles */
 .article-detail {
     max-width: 800px;
+    margin-top: 20px;
     margin: 0 auto;
     padding: 2rem;
+    padding-top: 100px;
 }
 
 .article-detail img {
@@ -1525,5 +1581,326 @@ html {
     .error-actions {
         flex-direction: column;
         align-items: center;
+    }
+}
+
+/* ====================================
+   About Me Page Styles
+   ==================================== */
+
+.about-me-hero {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    padding: 6rem 0 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-me-hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    font-weight: 300;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.about-me-content {
+    padding: 4rem 0;
+    background-color: #f9f9f9;
+    margin-top: -100px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 3rem;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Profile Picture Section */
+.profile-picture {
+    text-align: center;
+    margin: -100px auto 2rem;
+    position: relative;
+    z-index: 10;
+}
+
+.profile-picture img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-picture img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Main Content Styling */
+.main-content {
+    background: white;
+    padding: 3rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+    position: relative;
+    margin-top: 60px;
+    padding-top: 100px;
+}
+
+main {
+    padding-top: 100px;
+}
+
+.content-section {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.content-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.content-section h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    position: relative;
+    padding-bottom: 0.8rem;
+}
+
+.content-section h2 i {
+    margin-right: 10px;
+    color: #3498db;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+}
+
+.sidebar-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.sidebar h3:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 50px;
+    height: 3px;
+    background: #3498db;
+}
+
+/* Experience Grid */
+.experience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.experience-item {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.experience-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Skills Grid */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.skill-category {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.skill-category:hover {
+    transform: translateY(-3px);
+}
+
+.skill-category h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.skill-category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.skill-category li {
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.skill-category li:before {
+    content: '•';
+    color: #3498db;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* Interest Tags */
+.interest-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Social Links */
+.social-links-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    color: #2c3e50;
+    text-decoration: none;
+    padding: 0.5rem 0;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.social-link i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+    color: #3498db;
+    width: 25px;
+    text-align: center;
+}
+
+.social-link:hover {
+    color: #3498db;
+    transform: translateX(5px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        position: static;
+        margin-top: 3rem;
+    }
+    
+    .profile-picture img {
+        width: 180px;
+        height: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-me-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .main-content {
+        padding: 2rem;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .experience-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-me-hero {
+        padding: 5rem 0 3rem;
+    }
+    
+    .about-me-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .main-content {
+        padding: 1.5rem;
+        margin-top: 30px;
+    }
+    
+    .content-section h2 {
+        font-size: 1.6rem;
+    }
+    
+    .profile-picture {
+        margin-top: -70px;
+    }
+    
+    .profile-picture img {
+        width: 150px;
+        height: 150px;
     }
 }
