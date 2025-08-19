@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSupabase();
     initializeApp();
     mobileMenuToggle();
+    initMobileNav();
+    initTouchHandlers();
 });
 
 async function initializeSupabase() {
@@ -673,13 +675,13 @@ setInterval(async () => {
 
 function mobileMenuToggle() {
     const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-link');
+    const navMenu = document.querySelector('.nav-menu');
 
     // Toggle mobile menu
     hamburger?.addEventListener('click', function() {
         this.classList.toggle('active');
-        navMenu?.classList.toggle('active');
+        navMenu.classList.toggle('active');
         document.body.style.overflow = this.classList.contains('active') ? 'hidden' : '';
     });
 
@@ -694,7 +696,8 @@ function mobileMenuToggle() {
 
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.nav') && navMenu?.classList.contains('active')) {
+        const isClickInside = navMenu.contains(e.target) || hamburger.contains(e.target);
+        if (!isClickInside && navMenu?.classList.contains('active')) {
             hamburger?.classList.remove('active');
             navMenu?.classList.remove('active');
             document.body.style.overflow = '';
@@ -702,65 +705,158 @@ function mobileMenuToggle() {
     });
 }
 
+// Initialize mobile menu when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    mobileMenuToggle();
+});
+
 // Mobile Navigation Toggle
 const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
-const navLinks = document.querySelector('.nav-links');
 const overlay = document.querySelector('.overlay');
 
-if (mobileNavToggle && navLinks) {
-    mobileNavToggle.addEventListener('click', () => {
-        const isExpanded = mobileNavToggle.getAttribute('aria-expanded') === 'true';
-        mobileNavToggle.setAttribute('aria-expanded', !isExpanded);
-        navLinks.classList.toggle('active');
-        overlay.classList.toggle('active');
-        document.body.style.overflow = isExpanded ? '' : 'hidden';
-    });
+// Toggle mobile menu
+function toggleMobileMenu() {
+    navMenu.classList.toggle('active');
+    overlay.classList.toggle('active');
+    document.body.classList.toggle('no-scroll');
+    
+    // Update ARIA attributes
+    const isExpanded = navMenu.classList.contains('active');
+    mobileNavToggle.setAttribute('aria-expanded', isExpanded);
+    
+    // Toggle hamburger icon
+    mobileNavToggle.classList.toggle('is-active');
+}
 
-    // Close mobile menu when clicking on overlay
-    if (overlay) {
-        overlay.addEventListener('click', () => {
-            mobileNavToggle.setAttribute('aria-expanded', 'false');
-            navLinks.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
+// Close mobile menu when clicking outside
+function closeMobileMenu(e) {
+    if (navMenu.classList.contains('active') && !e.target.closest('.nav-menu') && !e.target.closest('.mobile-nav-toggle')) {
+        toggleMobileMenu();
     }
+}
 
-    // Close mobile menu when clicking on a nav link
-    const navItems = navLinks.querySelectorAll('a');
-    navItems.forEach(link => {
+// Close mobile menu when clicking on a nav link
+function closeOnNavLinkClick() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
         link.addEventListener('click', () => {
-            if (window.innerWidth <= 991) {
-                mobileNavToggle.setAttribute('aria-expanded', 'false');
-                navLinks.classList.remove('active');
-                overlay.classList.remove('active');
-                document.body.style.overflow = '';
+            if (navMenu.classList.contains('active')) {
+                toggleMobileMenu();
             }
         });
     });
 }
 
-// Handle window resize events
-let resizeTimer;
-window.addEventListener('resize', () => {
-    document.body.classList.add('resize-animation-stopper');
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        document.body.classList.remove('resize-animation-stopper');
-        
-        // Reset mobile menu on larger screens
-        if (window.innerWidth > 991) {
-            if (navLinks) navLinks.classList.remove('active');
-            if (overlay) overlay.classList.remove('active');
-            if (mobileNavToggle) mobileNavToggle.setAttribute('aria-expanded', 'false');
-            document.body.style.overflow = '';
+// Initialize mobile navigation
+function initMobileNav() {
+    if (mobileNavToggle) {
+        // Create overlay if it doesn't exist
+        if (!overlay) {
+            const overlayEl = document.createElement('div');
+            overlayEl.className = 'overlay';
+            document.body.appendChild(overlayEl);
         }
-    }, 400);
+        
+        // Add event listeners
+        mobileNavToggle.addEventListener('click', toggleMobileMenu);
+        document.addEventListener('click', closeMobileMenu);
+        closeOnNavLinkClick();
+        
+        // Set initial ARIA attributes
+        mobileNavToggle.setAttribute('aria-label', 'Toggle navigation');
+        mobileNavToggle.setAttribute('aria-expanded', 'false');
+        mobileNavToggle.setAttribute('aria-controls', 'nav-menu');
+    }
+}
+
+// Handle touch events for better mobile UX
+function initTouchHandlers() {
+    // Prevent double-tap zoom on buttons and links
+    const interactiveElements = document.querySelectorAll('a, button, .btn, [role="button"]');
+    interactiveElements.forEach(el => {
+        el.addEventListener('touchend', function(e) {
+            // Add active class for visual feedback
+            this.classList.add('active');
+            
+            // Remove active class after animation completes
+            setTimeout(() => {
+                this.classList.remove('active');
+            }, 150);
+            
+            // Prevent ghost clicks on iOS
+            e.preventDefault();
+            this.click();
+        }, { passive: false });
+    });
+}
+
+// Handle viewport resize
+function handleResize() {
+    // Close mobile menu if window is resized to desktop
+    if (window.innerWidth > 991.98 && navMenu.classList.contains('active')) {
+        toggleMobileMenu();
+    }
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initMobileNav();
+    initTouchHandlers();
+    
+    // Add resize event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Add loaded class to body to prevent FOUC
+    document.body.classList.add('loaded');
+});
+
+// Handle page transitions
+window.addEventListener('beforeunload', () => {
+    document.body.classList.add('page-transition-out');
+});
+
+// Handle scroll events for header
+let lastScroll = 0;
+const header = document.querySelector('.header');
+
+if (header) {
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll <= 0) {
+            header.classList.remove('scroll-up');
+            return;
+        }
+        
+        if (currentScroll > lastScroll && !header.classList.contains('scroll-down')) {
+            // Scrolling down
+            header.classList.remove('scroll-up');
+            header.classList.add('scroll-down');
+        } else if (currentScroll < lastScroll && header.classList.contains('scroll-down')) {
+            // Scrolling up
+            header.classList.remove('scroll-down');
+            header.classList.add('scroll-up');
+        }
+        
+        lastScroll = currentScroll;
+    });
+}
+
+// Handle form submissions with loading states
+const forms = document.querySelectorAll('form');
+forms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
+        }
+    });
 });
 
 // Add smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
+    anchor.addEventListener('click', function(e) {
         e.preventDefault();
         
         const targetId = this.getAttribute('href');
@@ -768,51 +864,21 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         
         const targetElement = document.querySelector(targetId);
         if (targetElement) {
-            const headerOffset = 100; // Adjust based on your header height
-            const elementPosition = targetElement.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
             window.scrollTo({
-                top: offsetPosition,
+                top: targetElement.offsetTop - 80, // Adjust for fixed header
                 behavior: 'smooth'
             });
         }
     });
 });
 
-// Add active class to current section in navigation
-const sections = document.querySelectorAll('section[id]');
-
-function highlightNavigation() {
-    const scrollY = window.pageYOffset;
-    
-    sections.forEach(section => {
-        const sectionHeight = section.offsetHeight;
-        const sectionTop = section.offsetTop - 100;
-        const sectionId = section.getAttribute('id');
-        
-        if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-            document.querySelector(`.nav-links a[href*=${sectionId}]`).classList.add('active');
-        } else {
-            const navLink = document.querySelector(`.nav-links a[href*=${sectionId}]`);
-            if (navLink) navLink.classList.remove('active');
-        }
-    });
-}
-
-window.addEventListener('scroll', highlightNavigation);
-
-// Add loading animation for page transitions
-document.addEventListener('DOMContentLoaded', () => {
-    // Add loading class to body
-    document.body.classList.add('page-loading');
-    
-    // Remove loading class after page loads
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            document.body.classList.remove('page-loading');
-        }, 300);
-    });
+// Add loading class to body to prevent FOUC
+document.addEventListener('readystatechange', () => {
+    if (document.readyState === 'interactive') {
+        document.body.classList.remove('loaded');
+    } else if (document.readyState === 'complete') {
+        document.body.classList.add('loaded');
+    }
 });
 
 // Lazy load images
