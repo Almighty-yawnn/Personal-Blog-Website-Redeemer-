@@ -19,14 +19,16 @@ let currentCategory = 'all';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    loadHeader();  
     initializeSupabase();
     initializeApp();
+    mobileMenuToggle();
 });
 
 async function initializeSupabase() {
     try {
         // Check if Supabase variables are missing or not set
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL === 'https://bxusfjvtccvkpwlxupiq.supabase.co' || SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4dXNmanZ0Y2N2a3B3bHh1cGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMyODIsImV4cCI6MjA2ODY2OTI4Mn0.aZ4PMbuSzDyBxQwab7ST5_sK0XLDPmG9OlxEHV-kYVQ') {
             console.warn('Supabase not configured, using fallback data');
             loadFallbackArticles();
             return;
@@ -579,31 +581,79 @@ setTimeout(() => {
     }, 5000);
 }, 2000);
 
+function loadHeader() {
+    const headerPlaceholder = document.querySelector('header[data-include-html]');
+    if (headerPlaceholder) {
+        const headerFile = headerPlaceholder.getAttribute('data-include-html');
+        fetch(headerFile)
+            .then(response => response.text())
+            .then(html => {
+                // Add a class to prevent flash of unstyled content
+                document.documentElement.classList.add('js-header-loading');
+                
+                // Insert the header HTML
+                headerPlaceholder.outerHTML = html;
+                
+                // Force reflow to ensure animations work
+                void headerPlaceholder.offsetWidth;
+                
+                // Remove loading class to trigger animations
+                setTimeout(() => {
+                    document.documentElement.classList.remove('js-header-loading');
+                    document.documentElement.classList.add('js-header-loaded');
+                }, 50);
+                
+                // Re-initialize mobile menu after header is loaded
+                mobileMenuToggle();
+            })
+            .catch(error => {
+                console.error('Error loading header:', error);
+                // If there's an error, still try to show the header without animation
+                document.documentElement.classList.add('js-header-loaded');
+            });
+    } else {
+        document.documentElement.classList.add('js-header-loaded');
+    }
+}
 
-const text = "Connecting Data, People, and Ideas through Research, Communication, and Strategic Thinking";
+const texts = [
+    "Connecting Data, People, and Ideas through Research, Communication, and Strategic Thinking",
+    "Transforming complex information into actionable insights that drive smarter decisions.",
+    "Storytelling that creates impact, inspires change, and connects with people deeply.",
+    "Empowering organizations with knowledge to make informed decisions and drive positive change."
+];
+
 const typingElement = document.getElementById("typing-text");
 
-let i = 0;
+  let textIndex = 0;   // which sentence we are on
+  let charIndex = 0;   // which character in the sentence
 let isDeleting = false;
 
 function typeEffect() {
+    const currentText = texts[textIndex];
+
     if (!isDeleting) {
-    typingElement.textContent = text.substring(0, i + 1);
-    i++;
-    if (i === text.length) {
+    typingElement.textContent = currentText.substring(0, charIndex + 1);
+    charIndex++;
+
+    if (charIndex === currentText.length) {
         isDeleting = true;
-        setTimeout(typeEffect, 3000); // pause before deleting
+        setTimeout(typeEffect, 3000); // pause after full sentence
         return;
     }
     } else {
-    typingElement.textContent = text.substring(0, i - 1);
-    i--;
-    if (i === 0) {
+    typingElement.textContent = currentText.substring(0, charIndex - 1);
+    charIndex--;
+
+    if (charIndex === 0) {
         isDeleting = false;
+        textIndex = (textIndex + 1) % texts.length; // move to next phrase, loop back
     }
     }
-    setTimeout(typeEffect, isDeleting ? 100 : 100); // speed control
+
+    setTimeout(typeEffect, isDeleting ? 50 : 100); // adjust typing & deleting speed
 }
+
 
 typeEffect();
 
@@ -620,3 +670,182 @@ setInterval(async () => {
         console.error('Error refreshing articles:', error);
     }
 }, 30000); // Poll every 30 seconds
+
+function mobileMenuToggle() {
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    // Toggle mobile menu
+    hamburger?.addEventListener('click', function() {
+        this.classList.toggle('active');
+        navMenu?.classList.toggle('active');
+        document.body.style.overflow = this.classList.contains('active') ? 'hidden' : '';
+    });
+
+    // Close menu when clicking on a nav link
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger?.classList.remove('active');
+            navMenu?.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav') && navMenu?.classList.contains('active')) {
+            hamburger?.classList.remove('active');
+            navMenu?.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Mobile Navigation Toggle
+const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
+const navLinks = document.querySelector('.nav-links');
+const overlay = document.querySelector('.overlay');
+
+if (mobileNavToggle && navLinks) {
+    mobileNavToggle.addEventListener('click', () => {
+        const isExpanded = mobileNavToggle.getAttribute('aria-expanded') === 'true';
+        mobileNavToggle.setAttribute('aria-expanded', !isExpanded);
+        navLinks.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = isExpanded ? '' : 'hidden';
+    });
+
+    // Close mobile menu when clicking on overlay
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            mobileNavToggle.setAttribute('aria-expanded', 'false');
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+
+    // Close mobile menu when clicking on a nav link
+    const navItems = navLinks.querySelectorAll('a');
+    navItems.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 991) {
+                mobileNavToggle.setAttribute('aria-expanded', 'false');
+                navLinks.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+}
+
+// Handle window resize events
+let resizeTimer;
+window.addEventListener('resize', () => {
+    document.body.classList.add('resize-animation-stopper');
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        document.body.classList.remove('resize-animation-stopper');
+        
+        // Reset mobile menu on larger screens
+        if (window.innerWidth > 991) {
+            if (navLinks) navLinks.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+            if (mobileNavToggle) mobileNavToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+    }, 400);
+});
+
+// Add smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            const headerOffset = 100; // Adjust based on your header height
+            const elementPosition = targetElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+
+// Add active class to current section in navigation
+const sections = document.querySelectorAll('section[id]');
+
+function highlightNavigation() {
+    const scrollY = window.pageYOffset;
+    
+    sections.forEach(section => {
+        const sectionHeight = section.offsetHeight;
+        const sectionTop = section.offsetTop - 100;
+        const sectionId = section.getAttribute('id');
+        
+        if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+            document.querySelector(`.nav-links a[href*=${sectionId}]`).classList.add('active');
+        } else {
+            const navLink = document.querySelector(`.nav-links a[href*=${sectionId}]`);
+            if (navLink) navLink.classList.remove('active');
+        }
+    });
+}
+
+window.addEventListener('scroll', highlightNavigation);
+
+// Add loading animation for page transitions
+document.addEventListener('DOMContentLoaded', () => {
+    // Add loading class to body
+    document.body.classList.add('page-loading');
+    
+    // Remove loading class after page loads
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.body.classList.remove('page-loading');
+        }, 300);
+    });
+});
+
+// Lazy load images
+if ('loading' in HTMLImageElement.prototype) {
+    // Native lazy loading is supported
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    images.forEach(img => {
+        img.src = img.dataset.src;
+    });
+} else {
+    // Fallback for browsers that don't support native lazy loading
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+    document.body.appendChild(script);
+}
+
+// Add focus styles for keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+        document.body.classList.add('using-keyboard');
+    }
+});
+
+document.addEventListener('mousedown', () => {
+    document.body.classList.remove('using-keyboard');
+});
+
+// Add smooth scroll behavior for browsers that don't support it natively
+if (!('scrollBehavior' in document.documentElement.style)) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/smoothscroll-polyfill@0.4.4/dist/smoothscroll.min.js';
+    script.onload = () => {
+        smoothScroll.polyfill();
+    };
+    document.head.appendChild(script);
+}

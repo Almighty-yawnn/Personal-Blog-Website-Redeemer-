@@ -2,56 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Redeemer Buatsi - Journalist & Media Professional</title>
+    <link rel="icon" type="image/png" href="assets/logo5.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <div class="nav-container">
-                <div class="logo">
-                    <a href="index.html">
-                        <h1>Redeemer Buatsi</h1>
-                        <p>Journalist & Media Professional</p>
-                    </a>
-                </div>
-                <ul class="nav-menu">
-                    <li><a href="#home" class="nav-link">Home</a></li>
-                    <li><a href="about-me.html" class="nav-link">About Me</a></li>
-                    <li><a href="articles.html" class="nav-link">Articles</a></li>
-                    <li><a href="#contact" class="nav-link">Contact</a></li>
-                    <li><a href="admin.html" class="nav-link admin-link">Admin</a></li>
-                </ul>
-                <div class="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </nav>
-    </header>
+    <!-- Header will be loaded here -->
+    <header data-include-html="header.html"></header>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1>Uncovering Truth Through Journalism</h1>
-                <p>Welcome to my digital space where I share insights, breaking news, and in-depth analysis from Ghana's media landscape and beyond.</p>
-                <div class="hero-buttons">
-                    <a href="articles.html" class="btn btn-primary">Read Latest Articles</a>
-                    <a href="#about" class="btn btn-secondary">Learn About Me</a>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Uncovering Truth Through Journalism</h1>
+                    <p>Welcome to my digital space where I share insights, breaking news, and in-depth analysis from Ghana's media landscape and beyond.</p>
+                    <div class="hero-buttons">
+                        <a href="articles.html" class="btn btn-primary">Read Latest Articles</a>
+                        <a href="about-me.html" class="btn btn-secondary">Learn About Me</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="assets/red1.jpg" alt="Redeemer Buatsi" />
                 </div>
             </div>
-            <div class="hero-image">
-                <img src="/assets/red1.jpg" alt="Redeemer Buatsi" />
+            <div class="scroll-indicator">
+                <i class="fas fa-chevron-down"></i>
             </div>
-        </div>
-        <div class="scroll-indicator">
-            <i class="fas fa-chevron-down"></i>
         </div>
     </section>
 

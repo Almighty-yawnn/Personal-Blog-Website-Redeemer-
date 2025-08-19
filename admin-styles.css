@@ -95,6 +95,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    margin-top: -80px;
 }
 
 .admin-nav {
