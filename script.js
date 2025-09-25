@@ -635,22 +635,22 @@ function typeEffect() {
     const currentText = texts[textIndex];
 
     if (!isDeleting) {
-    typingElement.textContent = currentText.substring(0, charIndex + 1);
-    charIndex++;
+        typingElement.textContent = currentText.substring(0, charIndex + 1);
+        charIndex++;
 
-    if (charIndex === currentText.length) {
-        isDeleting = true;
-        setTimeout(typeEffect, 3000); // pause after full sentence
-        return;
-    }
+        if (charIndex === currentText.length) {
+            isDeleting = true;
+            setTimeout(typeEffect, 3000); // pause after full sentence
+            return;
+        }
     } else {
-    typingElement.textContent = currentText.substring(0, charIndex - 1);
-    charIndex--;
+        typingElement.textContent = currentText.substring(0, charIndex - 1);
+        charIndex--;
 
-    if (charIndex === 0) {
-        isDeleting = false;
-        textIndex = (textIndex + 1) % texts.length; // move to next phrase, loop back
-    }
+        if (charIndex === 0) {
+            isDeleting = false;
+            textIndex = (textIndex + 1) % texts.length; // move to next phrase, loop back
+        }
     }
 
     setTimeout(typeEffect, isDeleting ? 50 : 100); // adjust typing & deleting speed
@@ -676,12 +676,10 @@ setInterval(async () => {
 function mobileMenuToggle() {
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelectorAll('.nav-link');
-    const navMenu = document.querySelector('.nav-menu');
 
     // Toggle mobile menu
     hamburger?.addEventListener('click', function() {
         this.classList.toggle('active');
-        navMenu.classList.toggle('active');
         document.body.style.overflow = this.classList.contains('active') ? 'hidden' : '';
     });
 
@@ -689,26 +687,18 @@ function mobileMenuToggle() {
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             hamburger?.classList.remove('active');
-            navMenu?.classList.remove('active');
             document.body.style.overflow = '';
         });
     });
 
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
-        const isClickInside = navMenu.contains(e.target) || hamburger.contains(e.target);
-        if (!isClickInside && navMenu?.classList.contains('active')) {
+        if (!e.target.closest('.nav') && hamburger?.classList.contains('active')) {
             hamburger?.classList.remove('active');
-            navMenu?.classList.remove('active');
             document.body.style.overflow = '';
         }
     });
 }
-
-// Initialize mobile menu when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    mobileMenuToggle();
-});
 
 // Mobile Navigation Toggle
 const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
@@ -820,22 +810,24 @@ let lastScroll = 0;
 const header = document.querySelector('.header');
 
 if (header) {
+    // Add initial styles for smooth transitions
+    header.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+    
     window.addEventListener('scroll', () => {
         const currentScroll = window.pageYOffset;
         
         if (currentScroll <= 0) {
-            header.classList.remove('scroll-up');
+            // At top of page - show header fully
+            header.classList.remove('hide');
             return;
         }
         
-        if (currentScroll > lastScroll && !header.classList.contains('scroll-down')) {
-            // Scrolling down
-            header.classList.remove('scroll-up');
-            header.classList.add('scroll-down');
-        } else if (currentScroll < lastScroll && header.classList.contains('scroll-down')) {
-            // Scrolling up
-            header.classList.remove('scroll-down');
-            header.classList.add('scroll-up');
+        if (currentScroll > lastScroll) {
+            // Scrolling down - hide header
+            header.classList.add('hide');
+        } else {
+            // Scrolling up - show header
+            header.classList.remove('hide');
         }
         
         lastScroll = currentScroll;
